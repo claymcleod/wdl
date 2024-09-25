@@ -17,6 +17,11 @@ Keep the changelog pleasant to read in the text editor:
 + Properly indent blocks.
 -->
 
+version 1.3.0
+---------------------------
+
+
+
 version 1.2.0
 ---------------------------
 
