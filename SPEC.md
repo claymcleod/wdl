@@ -91,23 +91,23 @@ Revisions to this specification are made periodically in order to correct errors
     - [Task Outputs](#task-outputs)
       - [File, Directory, and Optional Outputs](#file-directory-and-optional-outputs)
     - [Evaluation of Task Declarations](#evaluation-of-task-declarations)
-    - [✨ Requirements Section](#-requirements-section)
+    - [Requirements Section](#-requirements-section)
       - [Units of Storage](#units-of-storage)
       - [Requirements attributes](#requirements-attributes)
         - [`container`](#container)
         - [`cpu`](#cpu)
         - [`memory`](#memory)
-        - [Hardware Accelerators (`gpu` and ✨ `fpga`)](#hardware-accelerators-gpu-and--fpga)
+        - [Hardware Accelerators (`gpu` and `fpga`)](#hardware-accelerators-gpu-and--fpga)
         - [`disks`](#disks)
         - [`max_retries`](#max_retries)
         - [`return_codes`](#return_codes)
-    - [✨ Hints Section](#-hints-section)
+    - [Hints Section](#-hints-section)
       - [Hints-scoped types](#hints-scoped-types)
       - [Reserved Task Hints](#reserved-task-hints)
         - [`max_cpu`](#max_cpu)
         - [`max_memory`](#max_memory)
-        - [✨ `disks`](#-disks)
-        - [✨ `gpu` and ✨ `fpga`](#-gpu-and--fpga)
+        - [`disks`](#-disks)
+        - [`gpu` and `fpga`](#-gpu-and--fpga)
         - [`short_task`](#short_task)
         - [`localization_optional`](#localization_optional)
         - [`inputs`](#inputs)
@@ -144,12 +144,12 @@ Revisions to this specification are made periodically in order to correct errors
     - [`min`](#min)
     - [`max`](#max)
   - [String Functions](#string-functions)
-    - [✨ `find`](#-find)
-    - [✨ `matches`](#-matches)
+    - [`find`](#-find)
+    - [`matches`](#-matches)
     - [`sub`](#sub)
   - [File Functions](#file-functions)
     - [`basename`](#basename)
-    - [✨ `join_paths`](#-join_paths)
+    - [`join_paths`](#-join_paths)
     - [`glob`](#glob)
       - [Non-standard Bash](#non-standard-bash)
     - [`size`](#size)
@@ -183,8 +183,8 @@ Revisions to this specification are made periodically in order to correct errors
     - [`cross`](#cross)
     - [`zip`](#zip)
     - [`unzip`](#unzip)
-    - [✨ `contains`](#-contains)
-    - [✨ `chunk`](#-chunk)
+    - [`contains`](#-contains)
+    - [`chunk`](#-chunk)
     - [`flatten`](#flatten)
     - [`select_first`](#select_first)
     - [`select_all`](#select_all)
@@ -192,8 +192,8 @@ Revisions to this specification are made periodically in order to correct errors
     - [`as_pairs`](#as_pairs)
     - [`as_map`](#as_map)
     - [`keys`](#keys)
-    - [✨ `contains_key`](#-contains_key)
-    - [✨ `values`](#-values)
+    - [`contains_key`](#-contains_key)
+    - [`values`](#-values)
     - [`collect_by_key`](#collect_by_key)
   - [Other Functions](#other-functions)
     - [`defined`](#defined)
@@ -554,7 +554,7 @@ The following primitive types exist in WDL:
 * A `Float` represents a finite 64-bit IEEE-754 floating point number.
 * A `String` represents a unicode character string following the format described [below](#strings).
 * A `File` represents a file (or file-like object).
-* ✨ A `Directory` represents a (possibly nested) directory of files.
+* A `Directory` represents a (possibly nested) directory of files (*as of version 1.2*).
 
 <details>
   <summary>
@@ -4749,7 +4749,9 @@ Input and private declarations may appear in any order within their respective s
 
 Declarations in the output section may reference any input and private declarations, and may also reference other output declarations.
 
-### ✨ Requirements Section
+### Requirements Section
+
+*as of version 1.2*
 
 The `requirements` section defines a set of key/value pairs that represent the minimum requirements needed to run a task and the conditions under which a task should be interpreted as a failure or success. The `requirements` section is limited to the attributes defined in this specification. Arbitrary key/value pairs are not allowed in the `requirements` section, and must instead be placed in the [`hints`](#-hints-section) section.
 
@@ -5017,7 +5019,9 @@ Test config:
 </p>
 </details>
 
-##### Hardware Accelerators (`gpu` and ✨ `fpga`)
+##### Hardware Accelerators (`gpu` and `fpga`)
+
+*fpga as of version 1.2*
 
 * Accepted type: `Boolean`
 * Default value: `false`
@@ -5344,7 +5348,9 @@ Test config:
 </p>
 </details>
 
-### ✨ Hints Section
+### Hints Section
+
+*as of version 1.2*
 
 The `hints` section is optional and may contain any number of attributes (key/value pairs) that provide hints to the execution engine. A hint provides additional context that the execution engine can use to optimize the execution of the task. The execution engine may also ignore any hint for any reason. A task execution never fails due to the inability of the execution engine to recognize or satisfy a hint.
 
@@ -5435,7 +5441,9 @@ A hint to the execution engine that the task expects to use no more than the spe
 
 A hint to the execution engine that the task expects to use no more than the specified amount of memory. The value of this hint has the same specification as [`requirements.memory`](#memory).
 
-##### ✨ `disks`
+##### `disks`
+
+*as of version 1.2*
 
 * Accepted types:
     * `String`: Disk specification.
@@ -5445,7 +5453,9 @@ A hint to the execution engine to mount [disks](#disks) with specific attributes
 
 Volume specifications are left intentionally vague as they are primarily intented to be used in the context of a specific [compute environment](#compute-environments). The values "HDD" and "SSD" should be recognized to indicate that a specific class of hardware is being requested.
 
-##### ✨ `gpu` and ✨ `fpga`
+##### `gpu` and `fpga`
+
+*as of version 1.2*
 
 * Accepted types:
     * `Int`: Minimum number of accelerators being requested.
@@ -7652,7 +7662,9 @@ These functions operate on `String` arguments.
 
 **Restrictions**: None
 
-### ✨ `find`
+### `find`
+
+*as of version 1.2*
 
 Given two `String` parameters `input` and `pattern`, searches for the occurrence of `pattern` within `input` and returns the first match or `None` if there are no matches. `pattern` is a [regular expression](https://en.wikipedia.org/wiki/Regular_expression) and is evaluated as a [POSIX Extended Regular Expression (ERE)](https://en.wikipedia.org/wiki/Regular_expression#POSIX_basic_and_extended).
 
@@ -7706,7 +7718,9 @@ Example output:
 </p>
 </details>
 
-### ✨ `matches`
+### `matches`
+
+*as of version 1.2*
 
 Given two `String` parameters `input` and `pattern`, tests whether `pattern` matches `input` at least once. `pattern` is a [regular expression](https://en.wikipedia.org/wiki/Regular_expression) and is evaluated as a [POSIX Extended Regular Expression (ERE)](https://en.wikipedia.org/wiki/Regular_expression#POSIX_basic_and_extended).
 
@@ -7953,7 +7967,9 @@ Example output:
 </p>
 </details>
 
-### ✨ `join_paths`
+### `join_paths`
+
+*as of version 1.2*
 
 ```
 File join_paths(File, String)
@@ -10239,7 +10255,9 @@ Example output:
 </p>
 </details>
 
-### ✨ `contains`
+### `contains`
+
+*as of version 1.2*
 
 ```
 Boolean contains(Array[P], P)
@@ -10322,7 +10340,9 @@ Example output:
 </p>
 </details>
 
-### ✨ `chunk`
+### `chunk`
+
+*as of version 1.2*
 
 ```
 Array[Array[X]] chunk(Array[X], Int)
@@ -10867,7 +10887,9 @@ Example output:
 </p>
 </details>
 
-### ✨ `contains_key`
+### `contains_key`
+
+*as of version 1.2*
 
 ```
 * Boolean contains_key(Map[P, Y], P)
@@ -10959,7 +10981,9 @@ For example, if the first argument is a `Map[String, Map[String, Int]]` and the 
   </p>
 </details>
 
-### ✨ `values`
+### `values`
+
+*as of version 1.2*
 
 ```
 Array[Y] values(Map[P, Y])
