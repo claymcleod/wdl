@@ -13,20 +13,20 @@ provide simple but powerful facilities for (a) defining atomic units of computat
 environments.
 
 Most fundamentally, WDL differentiates itself from other workflow languages by focusing
-on ease of implementation and accessibility to wide range of users, including software
+on ease of implementation and accessibility to a wide range of users, including software
 engineers, domain experts (e.g, biologists), and operators of production computational
 systems. Furthermore, idiomatic workflow execution patterns, such as conditional
 execution, dynamic resource allocation, and scatter-gather operations, are simply
-expressed. Last, the language is driven and developed by community of distributed
-volunteers as an open standard—there is no single execution engine, and anyone can build
+expressed. Last, the language is driven and developed by a community of distributed
+volunteers as an open standard; there is no single execution engine, and anyone can build
 tooling to contribute to the ecosystem. Today, [several engines and
 platforms](#execution-engines-and-platforms) exist and cover most execution environments
 (all major HPCs, all major clouds, local execution).
 
 ## Getting Started
 
-If you're new to WDL, welcome 👋—we _highly_ recommend you read the [getting started
-documentation][wdl-docs] to learn how to write workflows. Beyond that, here are some
+If you're new to WDL, welcome 👋. We _highly_ recommend that you read the [getting started
+documentation][wdl-docs] to learn how to write tasks and workflows. Beyond that, here are some
 quickstart guides on various topics regarding getting up to speed with WDL.
 
 ### Join the community
