@@ -7146,11 +7146,11 @@ Example output:
 
 ### Conditional Statement
 
-A conditional statement consists of the `if` keyword, followed by a `Boolean` expression and a body of (potentially nested) statements. The conditional body is only evaluated if the conditional expression evaluates to `true`.
+A conditional statement consists of one or more conditional clauses. Each conditional clause is comprised of an expression that evaluates to a `Boolean` and an associated clause body. When a conditional statement is executed, each of the conditional clauses is evaluated sequentially: (a) the expression for that clause is evaluated and, if the returned value is `true`, the body of that clause is executed and the entire conditional statement suspends further execution. The simplest conditional statement contains a single "if" clause, which is the `if` keyword, followed by the clause's boolean expression, and, finally, the clause body of (potentially nested) statements wrapped in curly brackets.
 
 After evaluation of the conditional has completed, each declaration or call output in the conditional body is exposed in the enclosing context as an optional declaration. In other words, for a declaration or call output `T <name>` within a conditional body, a declaration `T? <name>` is implicitly available outside of the conditional body. If the expression evaluated to `true`, and thus the body of the conditional was evaluated, then the value of each exposed declaration is the same as its original value inside the conditional body. If the expression evaluated to `false` and thus the body of the conditional was not evaluated, then the value of each exposed declaration is `None`.
 
-The scoping rules for conditionals are similar to those for scatters - declarations or call outputs inside a conditional body are accessible within that conditional and any nested statements.
+The scoping rules for conditionals are similar to those for scatters—declarations or call outputs inside a conditional body are accessible within that conditional and any nested statements.
 
 In the example below, `Int j` is accessible anywhere in the conditional body, and `Int? j` is an optional that is accessible outside of the conditional anywhere in `workflow test_conditional`.
 
@@ -7231,7 +7231,9 @@ Example output:
 </p>
 </details>
 
-WDL has no `else` keyword. To mimic an `if-else` statement, you would simply use two conditionals with inverted boolean expressions. A common idiom is to use `select_first` to select a value from either the `if` or the `if not` body, whichever one is defined.
+After the initial `if` clause, conditional statements may have any number of `else if` clauses and a single, final `else` clause. As described in the paragraph above, `else if` clauses are only evaluated if all prior clauses in the statement have evaluated to `false`. If present, the final `else` clause executes only if all prior clauses evaluated to `false`.
+
+When gathering results from conditionals, a common idiom is to use `select_first` to select the defined value from the `if`, `else if`, or `else` body that was evaluated.
 
 <details>
 <summary>
@@ -7246,7 +7248,7 @@ task greet {
   }
 
   command <<<
-  printf "Good ~{time} buddy!"
+    printf "Good ~{time} buddy!"
   >>>
 
   output {
@@ -7259,13 +7261,11 @@ workflow if_else {
     Boolean is_morning = false
   }
   
-  # the body *is not* evaluated since 'b' is false
   if (is_morning) {
+    # The body *is not* evaluated since `is_morning` is `false`.
     call greet as morning { time = "morning" }
-  }
-
-  # the body *is* evaluated since !b is true
-  if (!is_morning) {
+  } else {
+    # The body *is* evaluated since the clause above did not trigger.
     call greet as afternoon { time = "afternoon" }
   }
 
