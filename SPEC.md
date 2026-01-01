@@ -236,6 +236,7 @@ Revisions to this specification are made periodically in order to correct errors
     - [Cyclic References](#cyclic-references)
     - [Namespaces without Scope](#namespaces-without-scope)
   - [Evaluation Order](#evaluation-order)
+- [Appendix C: Example Data](#appendix-c-example-data)
 
 ## Introduction
 
@@ -301,7 +302,7 @@ Below is the code for the "Hello World" workflow in WDL. This is just meant to g
 
   ```json
   {
-    "hello.infile": "greetings.txt",
+    "hello.infile": "data/greetings.txt",
     "hello.pattern": "hello.*"
   }
   ```
@@ -384,7 +385,7 @@ WDL also provides features for implementing more complex workflows. For example,
   ```json
   {
     "hello_parallel.pattern": "^[a-z_]+$",
-    "hello_parallel.files": ["greetings.txt", "hello.txt"]
+    "hello_parallel.files": ["data/greetings.txt", "data/hello.txt"]
   }
   ```
   
@@ -955,7 +956,7 @@ Test config:
 
 ```json
 {
-  "exclude_output": "result"
+  "exclude_outputs": ["result"]
 }
 ```
 
@@ -1300,14 +1301,14 @@ workflow test_map {
   Map[Int, Int] int_to_int = {1: 10, 2: 11}
   Map[String, Int] string_to_int = { "a": 1, "b": 2 }
   Map[File, Array[Int]] file_to_ints = {
-    "/path/to/file1": [0, 1, 2],
-    "/path/to/file2": [9, 8, 7]
+    "data/cities.txt": [0, 1, 2],
+    "data/hello.txt": [9, 8, 7]
   }
 
   output {
     Int ten = int_to_int[1]  # evaluates to 10
     Int b = string_to_int["b"]  # evaluates to 2
-    Array[Int] ints = file_to_ints["/path/to/file1"]  # evaluates to [0, 1, 2]
+    Array[Int] ints = file_to_ints["data/cities.txt"]  # evaluates to [0, 1, 2]
   }
 }
 ```
@@ -1576,6 +1577,14 @@ Example output:
 ```json
 {}
 ```
+
+Test config:
+
+```json
+{
+  "fail": true
+}
+```
 </p>
 </details>
 
@@ -1700,7 +1709,7 @@ Example input:
 
 ```json
 {
-  "string_to_file.infile": "hello.txt"
+  "string_to_file.infile": "data/hello.txt"
 }
 ```
 
@@ -2373,8 +2382,8 @@ workflow file_directory_equality {
   }
 
   # After canonicalization, these compare as equal
-  Boolean workflow_files_equal = file_a == file_b
-  Boolean workflow_dirs_equal = dir_a == dir_b
+  Boolean files_eq = file_a == file_b
+  Boolean dirs_eq = dir_a == dir_b
 
   call check_equality {
     file_a = file_a,
@@ -2384,8 +2393,8 @@ workflow file_directory_equality {
   }
 
   output {
-    Boolean workflow_files_equal = workflow_files_equal
-    Boolean workflow_dirs_equal = workflow_dirs_equal
+    Boolean workflow_files_equal = files_eq
+    Boolean workflow_dirs_equal = dirs_eq
     Boolean task_files_equal = check_equality.task_files_equal
     Boolean task_dirs_equal = check_equality.task_dirs_equal
   }
@@ -2397,10 +2406,10 @@ Example input:
 
 ```json
 {
-  "file_directory_equality.file_a": "tests/data/hello.txt",
-  "file_directory_equality.file_b": "tests/data/../data/hello.txt",
-  "file_directory_equality.dir_a": "tests/data/testdir/",
-  "file_directory_equality.dir_b": "tests/data/testdir"
+  "file_directory_equality.file_a": "data/hello.txt",
+  "file_directory_equality.file_b": "data/../data/hello.txt",
+  "file_directory_equality.dir_a": "data/testdir/",
+  "file_directory_equality.dir_b": "data/testdir"
 }
 ```
 
@@ -3027,7 +3036,7 @@ Example input:
 
 ```json
 {
-  "placeholder_coercion.x": "hello.txt"
+  "placeholder_coercion.x": "data/hello.txt"
 }
 ```
 
@@ -3076,6 +3085,7 @@ Example output:
   
   ```json
   {
+    "placeholder_none.foo": null,
     "placeholder_none.s": "Foo is "
   }
   ```
@@ -3168,7 +3178,7 @@ Example input:
 
 ```json
 {
-  "flags.infile": "greetings.txt",
+  "flags.infile": "data/greetings.txt",
   "flags.pattern": "world"
 }
 ```
@@ -3536,7 +3546,7 @@ Example input:
       "period": "annually"
     },
     "assay_data": {
-      "wealthitis": "hello.txt"
+      "wealthitis": "data/hello.txt"
     }
   }
 }
@@ -3551,12 +3561,6 @@ Example output:
 ```
 
 Test config:
-
-```json
-{
-  "target": "greet_person"
-}
-```
 </p>
 </details>
 
@@ -3735,7 +3739,7 @@ Example input:
 
 ```json
 {
-  "import_structs.infile": "hello.txt"
+  "import_structs.infile": "data/hello.txt"
 }
 ```
 
@@ -4476,7 +4480,7 @@ Example input:
 
 ```json
 {
-  "test_placeholders.infile": "greetings.txt"
+  "test_placeholders.infile": "data/greetings.txt"
 }
 ```
 
@@ -4531,6 +4535,14 @@ Example output:
 ```json
 {}
 ```
+
+Test config:
+
+```json
+{
+  "fail": true
+}
+```
 </p>
 </details>
 
@@ -4565,6 +4577,14 @@ Example output:
 
 ```json
 {}
+```
+
+Test config:
+
+```json
+{
+  "fail": true
+}
 ```
 </p>
 </details>
@@ -4611,7 +4631,7 @@ Example input:
 
 ```json
 {
-  "python_strip.infile": "comment.txt"
+  "python_strip.infile": "data/comment.txt"
 }
 ```
 
@@ -4689,7 +4709,7 @@ Test config:
 
 ```json
 {
-  "exclude_output": "outputs.csvs"
+  "exclude_outputs": ["outputs.csvs"]
 }
 ```
 </p>
@@ -4800,7 +4820,7 @@ Test config:
 
 ```json
 {
-  "exclude_output": "glob.outfiles"
+  "exclude_outputs": ["glob.outfiles"]
 }
 ```
 </p>
@@ -4851,7 +4871,7 @@ Test config:
 
 ```json
 {
-  "exclude_output": "relative_and_absolute.bashrc"
+  "exclude_outputs": ["relative_and_absolute.bashrc"]
 }
 ```
 </p>
@@ -4911,7 +4931,7 @@ Test config:
 
 ```json
 {
-  "exclude_output": ["optional_output.example1", "optional_output.file_array"]
+  "exclude_outputs": ["optional_output.example1", "optional_output.file_array"]
 }
 ```
 </p>
@@ -5180,7 +5200,7 @@ Test config:
 
 ```json
 {
-  "dependencies": "cpu"
+  "capabilities": ["cpu"]
 }
 ```
 </p>
@@ -5236,7 +5256,7 @@ Test config:
 
 ```json
 {
-  "dependencies": "memory"
+  "capabilities": ["memory"]
 }
 ```
 </p>
@@ -5293,8 +5313,8 @@ Test config:
 
 ```json
 {
-  "dependencies": "gpu",
-  "priority": "ignore"
+  "capabilities": ["gpu"],
+  "ignore": true
 }
 ```
 </p>
@@ -5361,7 +5381,7 @@ Test config:
 
 ```json
 {
-  "dependencies": "disks"
+  "capabilities": ["disks"]
 }
 ```
 </p>
@@ -5411,7 +5431,7 @@ Test config:
 
 ```json
 {
-  "dependencies": "disks"
+  "capabilities": ["disks"]
 }
 ```
 </p>
@@ -5484,7 +5504,7 @@ Test config:
 
 ```json
 {
-  "return_codes": 0
+  "return_code": 0
 }
 ```
 </p>
@@ -5526,7 +5546,7 @@ Test config:
 ```json
 {
   "fail": true,
-  "return_codes": 42
+  "return_code": 42
 }
 ```
 </p>
@@ -5567,7 +5587,7 @@ Test config:
 
 ```json
 {
-  "return_codes": 0
+  "return_code": 0
 }
 ```
 </p>
@@ -5632,7 +5652,7 @@ Example input:
 
 ```json
 {
-  "test_hints.foo": "greetings.txt"
+  "test_hints.foo": "data/greetings.txt"
 }
 ```
 
@@ -5648,7 +5668,7 @@ Test config:
 
 ```json
 {
-  "priority": "ignore"
+  "ignore": true
 }
 ```
 
@@ -5952,7 +5972,7 @@ Example input:
 
 ```json
 {
-  "ex_paramter_meta.infile": "greetings.txt",
+  "ex_paramter_meta.infile": "data/greetings.txt",
   "ex_paramter_meta.lines_only": true
 }
 ```
@@ -6042,8 +6062,8 @@ Example output:
 
 ```json
 {
-  "test_runtime_info_task.at_least_two_gb": true,
-  "test_runtime_info_task.return_code": 1
+  "test_runtime_info.at_least_two_gb": true,
+  "test_runtime_info.return_code": 1
 }
 ```
 
@@ -6051,8 +6071,7 @@ Test config:
 
 ```json
 {
-  "dependencies": ["cpu", "memory"],
-  "priority": "optional"
+  "capabilities": ["cpu", "memory"]
 }
 ```
 </p>
@@ -6357,7 +6376,7 @@ Example input:
 ```json
 {
   "other.b": true,
-  "other.f": "greetings.txt"
+  "other.f": "data/greetings.txt"
 }
 ```
 
@@ -6508,7 +6527,7 @@ Test config:
 
 ```json
 {
-  "dependencies": "allow_nested_inputs"
+  "capabilities": ["allow_nested_inputs"]
 }
 ```
 </p>
@@ -6559,7 +6578,7 @@ Test config:
 
 ```json
 {
-  "dependencies": "allow_nested_inputs"
+  "capabilities": ["allow_nested_inputs"]
 }
 ```
 </p>
@@ -6930,7 +6949,7 @@ Example input:
   "allow_nested.int_val": 3,
   "allow_nested.msg1": "hello",
   "allow_nested.my_ints": [1, 2, 3],
-  "allow_nested.ref_file": "hello.txt",
+  "allow_nested.ref_file": "data/hello.txt",
   "allow_nested.repeat2.opt_string": "goodbye"
 }
 ```
@@ -6983,6 +7002,14 @@ Example output:
 
 ```json
 {}
+```
+
+Test config:
+
+```json
+{
+  "fail": true
+}
 ```
 </p>
 </details>
@@ -7805,7 +7832,7 @@ Example input:
 
 ```json
 {
-  "test_matches.json": "person.json"
+  "test_matches.json": "data/person.json"
 }
 ```
 
@@ -7942,7 +7969,7 @@ Test config:
 
 ```json
 {
-  "exclude_output": ["change_extension.data_file"]
+  "exclude_outputs": ["change_extension.data_file"]
 }
 ```
 </p>
@@ -8173,7 +8200,7 @@ Test config:
 
 ```json
 {
-  "exclude_output": ["gen_files.files"]
+  "exclude_outputs": ["gen_files.files"]
 }
 ```
 </p>
@@ -8619,7 +8646,7 @@ Example input:
 ```json
 {
   "grep.pattern": "world",
-  "grep.file": "greetings.txt"
+  "grep.file": "data/greetings.txt"
 }
 ```
 
@@ -8810,15 +8837,15 @@ Example output:
   "read_tsv.output_objs3": [
     {
       "name": "row1",
-      "row": "value1"
+      "value": "value1"
     },
     {
       "name": "row2",
-      "row": "value2"
+      "value": "value2"
     },
     {
       "name": "row3",
-      "row": "value3"
+      "value": "value3"
     }
   ]
 }
@@ -8927,7 +8954,7 @@ Example output:
 {
   "write_tsv.array_no_header": ["one", "un"],
   "write_tsv.array_header": ["first", "one", "un"],
-  "write_tsv.structs_default": ["first", "one", "un"], 
+  "write_tsv.structs_default": ["one", "un"], 
   "write_tsv.structs_no_header": ["two", "deux"], 
   "write_tsv.structs_header": ["second", "two", "deux"], 
   "write_tsv.structs_user_header": ["no3", "three", "trois"]
@@ -9138,7 +9165,7 @@ Example input:
 
 ```json
 {
-  "read_person.json_file": "person.json"
+  "read_person.json_file": "data/person.json"
 }
 ```
 
@@ -10749,10 +10776,10 @@ version 1.2
 
 workflow test_as_pairs {
   Map[String, Int] x = {"a": 1, "c": 3, "b": 2}
-  Map[String, Pair[File, File]] y = {"a": ("a.bam", "a.bai"), "b": ("b.bam", "b.bai")}
+  Map[String, Pair[File, File]] y = {"a": ("data/questions.txt", "data/answers.txt"), "b": ("data/request.txt", "data/response.txt")}
   Array[Pair[String, Int]] expected1 = [("a", 1), ("c", 3), ("b", 2)]
-  Array[Pair[File, String]] expected2 = [("a.bam", "a"), ("b.bam", "b")]
-  Map[File, String] expected3 = {"a.bam": "a", "b.bam": "b"}
+  Array[Pair[File, String]] expected2 = [("data/questions.txt", "a"), ("data/request.txt", "b")]
+  Map[File, String] expected3 = {"data/questions.txt": "a", "data/request.txt": "b"}
 
   scatter (item in as_pairs(y)) {
     String s = item.left
@@ -10813,9 +10840,9 @@ version 1.2
 workflow test_as_map {
   input {
     Array[Pair[String, Int]] x = [("a", 1), ("c", 3), ("b", 2)]
-    Array[Pair[String, Pair[File,File]]] y = [("a", ("a.bam", "a.bai")), ("b", ("b.bam", "b.bai"))]
+    Array[Pair[String, Pair[File,File]]] y = [("a", ("data/cities.txt", "data/comment.txt")), ("b", ("data/hello.txt", "data/greetings.txt"))]
     Map[String, Int] expected1 = {"a": 1, "c": 3, "b": 2}
-    Map[String, Pair[File, File]] expected2 = {"a": ("a.bam", "a.bai"), "b": ("b.bam", "b.bai")}
+    Map[String, Pair[File, File]] expected2 = {"a": ("data/cities.txt", "data/comment.txt"), "b": ("data/hello.txt", "data/greetings.txt")}
   }
 
   output {
@@ -10914,8 +10941,8 @@ workflow test_keys {
   input {
     Map[String, Int] x = {"a": 1, "b": 2, "c": 3}
     Map[String, Pair[File, File]] str_to_files = {
-      "a": ("a.bam", "a.bai"), 
-      "b": ("b.bam", "b.bai")
+      "a": ("data/questions.txt", "data/answers.txt"),
+      "b": ("data/request.txt", "data/response.txt")
     }
     Name name = Name {
       first: "John",
@@ -11121,7 +11148,7 @@ Example output:
 
 ```json
 {
-  "test.values.sums": [3, 7]
+  "test_values.sums": [3, 7]
 }
 ```
 </p>
@@ -11154,14 +11181,14 @@ workflow test_collect_by_key {
   input {
     Array[Pair[String, Int]] x = [("a", 1), ("b", 2), ("a", 3)]
     Array[Pair[String, Pair[File, File]]] y = [
-      ("a", ("a_1.bam", "a_1.bai")), 
-      ("b", ("b.bam", "b.bai")), 
-      ("a", ("a_2.bam", "a_2.bai"))
+      ("a", ("data/questions.txt", "data/answers.txt")),
+      ("b", ("data/request.txt", "data/response.txt")),
+      ("a", ("data/wizard.txt", "data/spell.txt"))
     ]
     Map[String, Array[Int]] expected1 = {"a": [1, 3], "b": [2]}
     Map[String, Array[Pair[File, File]]] expected2 = {
-      "a": [("a_1.bam", "a_1.bai"), ("a_2.bam", "a_2.bai")], 
-      "b": [("b.bam", "b.bai")]
+      "a": [("data/questions.txt", "data/answers.txt"), ("data/wizard.txt", "data/spell.txt")],
+      "b": [("data/request.txt", "data/response.txt")]
     }
   }
 
@@ -11921,7 +11948,7 @@ Example input:
 
 ```json
 {
-  "serialize_array_delim.infile": "greetings.txt",
+  "serialize_array_delim.infile": "data/greetings.txt",
   "serialize_array_delim.counts": [1, 2]
 }
 ```
@@ -11982,7 +12009,7 @@ Example input:
 
 ```json
 {
-  "serde_array_lines.infile": "greetings.txt",
+  "serde_array_lines.infile": "data/greetings.txt",
   "serde_array_lines.patterns": ["hello", "world"]
 }
 ```
@@ -12141,8 +12168,8 @@ Example input:
 ```json
 {
   "serde_pair.to_tail": {
-    "cities.txt": 2,
-    "hello.txt": 1
+    "data/cities.txt": 2,
+    "data/hello.txt": 1
   }
 }
 ```
@@ -12308,7 +12335,7 @@ Example input:
 
 ```json
 {
-  "serialize_map.infile": "greetings.txt",
+  "serialize_map.infile": "data/greetings.txt",
   "serialize_map.pattern": "hello",
   "serialize_map.args": {
     "--after-context": "1",
@@ -12857,3 +12884,161 @@ The dependencies are:
 ```
 
 There are no cycles in this dependency graph; thus, this workflow is valid, although perhaps not as readable as it could be with better organization.
+
+## Appendix C: Example Data
+
+This appendix contains example data files that are used in conformance tests throughout the specification.
+
+<details>
+<summary>
+Resource: cities.txt
+
+```txt
+Houston
+Chicago
+Piscataway
+```
+
+</summary>
+</details>
+
+<details>
+<summary>
+Resource: comment.txt
+
+```txt
+# this is a comment
+A
+B
+C
+```
+
+</summary>
+</details>
+
+<details>
+<summary>
+Resource: greetings.txt
+
+```txt
+hello world
+hi_world
+hello nurse
+```
+
+</summary>
+</details>
+
+<details>
+<summary>
+Resource: hello.txt
+
+```txt
+hello
+```
+
+</summary>
+</details>
+
+<details>
+<summary>
+Resource: questions.txt
+
+```txt
+What is the meaning of life?
+How do I exit vim?
+Why is the sky blue?
+```
+
+</summary>
+</details>
+
+<details>
+<summary>
+Resource: answers.txt
+
+```txt
+42
+Press ESC then type :q!
+Rayleigh scattering
+```
+
+</summary>
+</details>
+
+<details>
+<summary>
+Resource: request.txt
+
+```txt
+GET /hello HTTP/1.1
+Host: example.com
+```
+
+</summary>
+</details>
+
+<details>
+<summary>
+Resource: response.txt
+
+```txt
+HTTP/1.1 200 OK
+Content-Type: text/plain
+
+Hello, World!
+```
+
+</summary>
+</details>
+
+<details>
+<summary>
+Resource: wizard.txt
+
+```txt
+Gandalf the Grey
+Merlin
+Albus Dumbledore
+```
+
+</summary>
+</details>
+
+<details>
+<summary>
+Resource: spell.txt
+
+```txt
+You shall not pass!
+Abracadabra
+Expecto Patronum
+```
+
+</summary>
+</details>
+
+<details>
+<summary>
+Resource: testdir/example.txt
+
+```txt
+This is an example file in a subdirectory.
+```
+
+</summary>
+</details>
+
+<details>
+<summary>
+Resource: person.json
+
+```json
+{
+    "name": "John",
+    "age": 42
+}
+```
+
+</summary>
+</details>
