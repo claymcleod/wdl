@@ -34,13 +34,13 @@ jobs:
       - name: Run the compliance tests
         run: |
           mkdir -p ./.results/
-          echo "📊 Running compliance tests for `${GITHUB_REPOSITORY}:${GITHUB_REF_NAME}`..."
+          echo "📊 Running compliance tests for `${{ github.event.pull_request.head.repo.full_name }}:${{ github.head_ref }}`..."
           spectool test \
             "sprocket run ~{path} ~{input} -e ~{target}" \
             --redirect-stdout \
             --all-capabilities \
-            --repository-url "https://github.com/${GITHUB_REPOSITORY}.git" \
-            -b ${GITHUB_REF_NAME} | tee ./.results/shield.json
+            --repository-url "https://github.com/${{ github.event.pull_request.head.repo.full_name }}.git" \
+            -b ${{ github.head_ref }} | tee ./.results/shield.json
       - name: Check for differences and post comment
         # Only publish a comment if there is a PR.
         if: github.event_name == 'pull_request'
@@ -55,7 +55,7 @@ jobs:
               COMMENT_BODY=$(cat <<EOF
           ## 🔍 Sprocket Compliance Test Results Changed
 
-          The compliance test results have changed on branch \`${GITHUB_REF_NAME}\`.
+          The compliance test results have changed on branch \`${{ github.head_ref }}\`.
 
           <details>
           <summary>View diff</summary>
@@ -92,7 +92,7 @@ jobs:
         run: |
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
-          BRANCH="${GITHUB_REF_NAME}"
+          BRANCH="${{ github.head_ref }}"
           RUN_ID="${{ github.run_id }}"
           REPO="${{ github.repository }}"
           RUN_URL="https://github.com/$REPO/actions/runs/$RUN_ID"
