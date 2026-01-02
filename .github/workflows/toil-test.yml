@@ -39,6 +39,7 @@ jobs:
             "toil-wdl-runner ~{path} --inputs ~{input}" \
             --redirect-stdout \
             --all-capabilities \
+            --label "Toil / WDL 1.2" \
             -s $PWD > ./.results/shield.json
           cat ./.results/shield.json
       - name: Publish badge JSON

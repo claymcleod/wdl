@@ -38,6 +38,7 @@ jobs:
             "sprocket run ~{path} ~{input} -e ~{target}" \
             --redirect-stdout \
             --all-capabilities \
+            --label "Sprocket / WDL 1.2" \
             -s $PWD > ./.results/shield.json
           cat ./.results/shield.json
       - name: Publish badge JSON
