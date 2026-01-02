@@ -32,16 +32,17 @@ jobs:
         run: |
           gh release download --repo broadinstitute/cromwell --pattern 'cromwell-*.jar'
           mv cromwell-*.jar cromwell.jar
+          java -jar cromwell.jar --version
 
       - name: Run the compliance tests
         run: |
           mkdir -p ./.results/
           echo "📊 Running compliance tests for \`${{ github.event.pull_request.head.repo.full_name }}:${{ github.head_ref }}\`..."
           spectool test \
-            "java -jar ${{ github.workspace }}/cromwell.jar run ~{path} --inputs ~{input}" \
-            --redirect-stdout \
+            "java -jar ${{ github.workspace }}/cromwell.jar run ~{path} --inputs ~{input} --metadata-output ~{output}" \
             --all-capabilities \
             --inject-wdl-version development \
+            --output-selector .outputs \
             -s $PWD > ./.results/shield.json
           cat ./.results/shield.json
       - name: Publish badge JSON

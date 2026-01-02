@@ -29,6 +29,7 @@ jobs:
       - name: Install `miniwdl`
         run: |
           pip install git+https://github.com/chanzuckerberg/miniwdl.git@main
+          miniwdl --version
 
       - name: Run the compliance tests
         run: |

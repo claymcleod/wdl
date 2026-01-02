@@ -29,6 +29,7 @@ jobs:
       - name: Install `toil`
         run: |
           pip install toil[wdl]
+          toil-wdl-runner --version
 
       - name: Run the compliance tests
         run: |
