@@ -45,8 +45,11 @@ jobs:
             -s $PWD > ./.results/shield.json
           cat ./.results/shield.json
       - name: Check for differences and post comment
-        # Only publish a comment if there is a PR.
-        if: github.event_name == 'pull_request'
+        # Only publish a comment if there is a PR originating from `openwdl/wdl`.
+        # This is because our `GH_TOKEN` needs to have permissions from the
+        # repository to post a comment.
+        if: github.event_name == 'pull_request' &&
+            github.repository == 'openwdl/wdl'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
