@@ -15,6 +15,8 @@ jobs:
       - name: Checkout WDL spec repo
         uses: actions/checkout@v6
       - name: Install `spectool`
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           gh release download --repo openwdl/spectool --pattern '*x86_64*linux*'
           tar -xzf spectool*.tar.gz
@@ -22,9 +24,9 @@ jobs:
           sudo mv spectool /usr/local/bin/
           rm -rf spectool*.tar.gz
           spectool --version
+      - name: Install `sprocket`
         env:
           GH_TOKEN: ${{ github.token }}
-      - name: Install `sprocket`
         run: |
           gh release download --repo stjude-rust-labs/sprocket --pattern '*x86_64*linux*'
           tar -xzvf sprocket*.tar.gz
@@ -32,8 +34,6 @@ jobs:
           sudo mv sprocket /usr/local/bin/
           rm -rf sprocket*.tar.gz
           sprocket --version
-        env:
-          GH_TOKEN: ${{ github.token }}
       - name: Run the compliance tests
         run: |
           mkdir -p ./.results/
@@ -53,7 +53,7 @@ jobs:
           # Compare with existing file
           if [[ -f ./.results/shield.json ]]; then
             if ! diff -q shields/sprocket.json ./.results/shield.json > /dev/null 2>&1; then
-              echo "📊 Differences detected in Sprocket `shield.json`"
+              echo "📊 Differences detected in Sprocket \`shield.json\`"
               DIFF_OUTPUT=$(diff -u shields/sprocket.json ./.results/shield.json || true)
               COMMENT_BODY=$(cat <<EOF
           ## 🔍 Sprocket Compliance Test Results Changed
