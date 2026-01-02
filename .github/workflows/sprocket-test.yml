@@ -1,13 +1,16 @@
-name: Spec compliance / Sprocket
+name: Spec Compliance / Sprocket
 
 on:
   pull_request:
   workflow_dispatch:
 
+permissions:
+  pull-requests: write
+  contents: read
+
 jobs:
   test:
     runs-on: ubuntu-latest
-    name: Compliance tests
     steps:
       - name: Checkout WDL spec repo
         uses: actions/checkout@v6
