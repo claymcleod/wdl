@@ -34,13 +34,13 @@ jobs:
       - name: Run the compliance tests
         run: |
           mkdir -p ./.results/
-          echo "📊 Running compliance tests for `${{ github.event.pull_request.head.repo.full_name }}:${{ github.head_ref }}`..."
+          echo "📊 Running compliance tests for \`${{ github.event.pull_request.head.repo.full_name }}:${{ github.head_ref }}\`..."
           spectool test \
             "sprocket run ~{path} ~{input} -e ~{target}" \
             --redirect-stdout \
             --all-capabilities \
-            --repository-url "https://github.com/${{ github.event.pull_request.head.repo.full_name }}.git" \
-            -b ${{ github.head_ref }} | tee ./.results/shield.json
+            -s $PWD > ./.results/shield.json
+          cat ./.results/shield.json
       - name: Check for differences and post comment
         # Only publish a comment if there is a PR.
         if: github.event_name == 'pull_request'
@@ -70,13 +70,10 @@ jobs:
           EOF
           )
 
-              # Post comment on the commit
-              gh api \
-                --method POST \
-                -H "Accept: application/vnd.github+json" \
-                /repos/${{ github.repository }}/commits/${GITHUB_SHA}/comments \
-                -f body="$COMMENT_BODY"
-
+              # Post comment on the PR
+              gh pr comment ${{ github.event.pull_request.number }} \
+                --repo ${{ github.repository }} \
+                --body "$COMMENT_BODY"
               echo "✅ Posted comment with diff"
             else
               echo "✅ No changes detected"
