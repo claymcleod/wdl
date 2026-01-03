@@ -39,6 +39,7 @@ jobs:
             "toil-wdl-runner ~{path} --inputs ~{input}" \
             --redirect-stdout \
             --all-capabilities \
+            --inject-wdl-version development \
             --label "Toil / WDL 1.2" \
             -s $PWD -vv > ./.results/shield.json
           cat ./.results/shield.json

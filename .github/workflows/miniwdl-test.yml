@@ -39,6 +39,7 @@ jobs:
             "miniwdl run ~{path} --input ~{input}" \
             --redirect-stdout \
             --all-capabilities \
+            --inject-wdl-version development \
             --output-selector .outputs \
             --label "MiniWDL / WDL 1.2" \
             -s $PWD -vv > ./.results/shield.json
