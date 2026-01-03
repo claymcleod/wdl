@@ -40,7 +40,7 @@ jobs:
             --redirect-stdout \
             --all-capabilities \
             --label "Toil / WDL 1.2" \
-            -s $PWD > ./.results/shield.json
+            -s $PWD -vv > ./.results/shield.json
           cat ./.results/shield.json
       - name: Publish badge JSON
         # Only publish the badges if this is run by dispatch.
