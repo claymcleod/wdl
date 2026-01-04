@@ -5346,6 +5346,7 @@ task one_mount_point {
 
   requirements {
     disks: "/mnt/outputs 10 GiB"
+    container: "ubuntu"
   }
 }
 ```
@@ -6530,10 +6531,10 @@ Example: multi_nested_inputs.wdl
 ```wdl
 version 1.2
 
-import "test_allow_nested_inputs.wdl"
+import "test_allow_nested_inputs.wdl" as nested
 
 workflow multi_nested_inputs { 
-  call test_allow_nested_inputs
+  call nested.test_allow_nested_inputs
 
   hints {
     allow_nested_inputs: false
@@ -6554,19 +6555,12 @@ Example input:
 }
 ```
 
-Example output:
-
-```json
-{
-  "multi_nested_inputs.nested_greeting": "Hello Joe"
-}
-```
-
 Test config:
 
 ```json
 {
-  "capabilities": ["allow_nested_inputs"]
+  "capabilities": ["allow_nested_inputs"],
+  "fail": true
 }
 ```
 </p>
@@ -8243,7 +8237,6 @@ task file_sizes {
     printf "this file is 22 bytes\n" > out.txt
   >>>
 
-  File created_file
   File? missing_file = None
 
   output {
@@ -8252,7 +8245,7 @@ task file_sizes {
     Float created_file_bytes = size(created_file, "B")
     Float multi_file_kb = size([created_file, missing_file], "K") # 0.022
 
-    Map[String, Pair[Int, File]] nested = {
+    Map[String, Pair[Int, File?]] nested = {
       "a": (10, created_file),
       "b": (50, missing_file)
     }
@@ -8276,9 +8269,14 @@ Example output:
 
 ```json
 {
+  "file_sizes.created_file": "out.txt",
   "file_sizes.missing_file_bytes": 0.0,
   "file_sizes.created_file_bytes": 22.0,
   "file_sizes.multi_file_kb": 0.022,
+  "file_size.nested": {
+    "a": (10, "out.txt"),
+    "b": (50, null)
+  }
   "file_sizes.nested_bytes": 22.0
 }
 ```
@@ -10476,7 +10474,7 @@ Example output:
   "chunk_array.o1": [["a", "b", "c"], ["d", "e", "f"]],
   "chunk_array.o2": [["a", "b", "c"], ["d", "e"]],
   "chunk_array.o3": [["a", "b"]],
-  "chunk_array.o4": [[]],
+  "chunk_array.o4": [],
   "chunk_array.concats": ["abc", "def"]
 }
 ``` 
@@ -10507,12 +10505,12 @@ version 1.2
 workflow test_flatten {
   input {
     Array[Array[Int]] ai2D = [[1, 2, 3], [1], [21, 22]]
-    Array[Array[File]] af2D = [["/tmp/X.txt"], ["/tmp/Y.txt", "/tmp/Z.txt"], []]
+    Array[Array[File]] af2D = [["data/cities.txt"], ["data/wizard.txt", "data/spell.txt"], []]
     Array[Array[Pair[Float, String]]] aap2D = [[(0.1, "mouse")], [(3, "cat"), (15, "dog")]]
     Map[Float, String] f2s = as_map(flatten(aap2D))
     Array[Array[Array[Int]]] ai3D = [[[1, 2], [3, 4]], [[5, 6], [7, 8]]]
     Array[Int] expected1D = [1, 2, 3, 1, 21, 22]
-    Array[File] expected2D = ["/tmp/X.txt", "/tmp/Y.txt", "/tmp/Z.txt"]
+    Array[File] expected2D = ["data/cities.txt", "data/wizard.txt", "data/spell.txt"]
     Array[Array[Int]] expected3D = [[1, 2], [3, 4], [5, 6], [7, 8]]
     Array[Pair[Float, String]] expectedArray = [(0.1, "mouse"), (3.0, "cat"), (15.0, "dog")]
     Map[Float, String] expectedMap = {0.1: "mouse", 3.0: "cat", 15.0: "dog"}
