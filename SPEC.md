@@ -923,7 +923,7 @@ version 1.2
 
 task relative_paths_context {
   # This relative path is resolved relative to the WDL document's parent directory.
-  File input_file = "hello.txt"
+  File input_file = "data/hello.txt"
 
   command <<<
     cat ~{input_file} > output.txt
@@ -948,6 +948,7 @@ Example output:
 
 ```json
 {
+  "relative_paths_context.result": "hello.txt"
   "relative_paths_context.content": "hello"
 }
 ```
@@ -4251,36 +4252,37 @@ Example: environment_variable_should_echo.wdl
 ```wdl
 version 1.2
 
-task test  {
+task test {
   input {
     env String greeting
   }
+
   command <<<
-    echo $foo
+    echo $greeting
   >>>
+
   output {
     String out = read_string(stdout())
   }
+}
 
-  workflow environment_variable_should_echo {
-    input {
-      String greeting 
-    }
+workflow environment_variable_should_echo {
+  input {
+    String greeting
+  }
     
-    call test {
-      input: greeting = greeting
-    }
+  call test {
+    input: greeting = greeting
+  }
     
-    output {
-      String out = test.out
-    }
+  output {
+    String out = test.out
   }
 }
 ```
 </summary>
 <p>
 Example input:
-
 
   ```json
   {
@@ -4295,16 +4297,7 @@ Example input:
     "environment_variable_should_echo.out": "hello"
   }
   ```
-
-  Test config:
-
-  ```json
-  {
-    "fail": false
-  }
-  ```
-
-  </p>
+</p>
 </details>
 
 #### String Escaping and Injection Prevention
@@ -4837,13 +4830,16 @@ version 1.2
 
 task relative_and_absolute {
   command <<<
-  mkdir -p my/path/to
-  printf "something" > my/path/to/something.txt
+    mkdir -p my/path/to
+    printf "something" > my/path/to/something.txt
   >>>
 
   output {
     String something = read_string("my/path/to/something.txt")
-    File bashrc = "/root/.bashrc"
+    # The following may or may not work depending on what the execution engine
+    # supports.
+    #
+    # File bashrc = "/root/.bashrc"
   }
 
   requirements {
@@ -4864,14 +4860,6 @@ Example output:
 ```json
 {
   "relative_and_absolute.something": "something"
-}
-```
-
-Test config:
-
-```json
-{
-  "exclude_outputs": ["relative_and_absolute.bashrc"]
 }
 ```
 </p>
