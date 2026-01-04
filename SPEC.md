@@ -10981,7 +10981,7 @@ Example output:
 
 Given a key-value type collection (`Map`, `Struct`, or `Object`) and a key, tests whether the collection contains an entry with the given key.
 
-This function has thre variants:
+This function has three variants:
 
 1. `Boolean contains_key(Map[P, Y], P)`: Tests whether the `Map` has an entry with the given key. If `P` is an optional type (e.g., `String?`), then the second argument may be `None`.
 2. `Boolean contains_key(Object, String)`: Tests whether the `Object` has an entry with the given name.
@@ -11009,7 +11009,7 @@ For example, if the first argument is a `Map[String, Map[String, Int]]` and the 
 
   struct Person {
     String name
-    Map[String, String]? details
+    Map[String, String] details
   }
 
   workflow test_contains_key {
@@ -11047,7 +11047,9 @@ For example, if the first argument is a `Map[String, Map[String, Int]]` and the 
       }
     },
     "test_contains_key.p2": {
-      "name": "Agent X"
+      "name": "Agent X",
+      "details": {
+      }
     }
   }
   ```
