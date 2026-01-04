@@ -1,6 +1,6 @@
 # Workflow Description Language (WDL)
 
-This is version 1.2.1 of the Workflow Description Language (WDL) specification. It describes WDL `version 1.2`. It introduces a number of new features (denoted by the ✨ symbol) and clarifications to the [1.1.*](https://github.com/openwdl/wdl/blob/wdl-1.1/SPEC.md) version of the specification. It also deprecates several aspects of the 1.0 and 1.1 specifications that will be removed in the [next major WDL version](https://github.com/openwdl/wdl/blob/wdl-2.0/SPEC.md) (denoted by the 🗑 symbol).
+This is version 1.2.1 of the Workflow Description Language (WDL) specification. It describes WDL `version 1.2`. It introduces a number of new features (denoted by the ✨ symbol) and clarifications to the [1.1.*](https://github.com/openwdl/wdl/blob/wdl-1.1/SPEC.md) version of the specification. It also deprecates several aspects of the 1.0 and 1.1 specifications that will be removed in the [next major WDL version](https://github.com/openwdl/wdl/blob/wdl-2.0/SPEC.md) (denoted by the 🗑 symbol). To be considered compliant with WDL 1.2, you must pass 95% or more of the compliance tests using [`spectool`](https://github.com/openwdl/spectool).
 
 ## Revisions
 
@@ -923,7 +923,7 @@ version 1.2
 
 task relative_paths_context {
   # This relative path is resolved relative to the WDL document's parent directory.
-  File input_file = "hello.txt"
+  File input_file = "data/hello.txt"
 
   command <<<
     cat ~{input_file} > output.txt
@@ -948,6 +948,7 @@ Example output:
 
 ```json
 {
+  "relative_paths_context.result": "hello.txt"
   "relative_paths_context.content": "hello"
 }
 ```
@@ -4251,36 +4252,37 @@ Example: environment_variable_should_echo.wdl
 ```wdl
 version 1.2
 
-task test  {
+task test {
   input {
     env String greeting
   }
+
   command <<<
-    echo $foo
+    echo $greeting
   >>>
+
   output {
     String out = read_string(stdout())
   }
+}
 
-  workflow environment_variable_should_echo {
-    input {
-      String greeting 
-    }
+workflow environment_variable_should_echo {
+  input {
+    String greeting
+  }
     
-    call test {
-      input: greeting = greeting
-    }
+  call test {
+    input: greeting = greeting
+  }
     
-    output {
-      String out = test.out
-    }
+  output {
+    String out = test.out
   }
 }
 ```
 </summary>
 <p>
 Example input:
-
 
   ```json
   {
@@ -4295,16 +4297,7 @@ Example input:
     "environment_variable_should_echo.out": "hello"
   }
   ```
-
-  Test config:
-
-  ```json
-  {
-    "fail": false
-  }
-  ```
-
-  </p>
+</p>
 </details>
 
 #### String Escaping and Injection Prevention
@@ -4837,13 +4830,16 @@ version 1.2
 
 task relative_and_absolute {
   command <<<
-  mkdir -p my/path/to
-  printf "something" > my/path/to/something.txt
+    mkdir -p my/path/to
+    printf "something" > my/path/to/something.txt
   >>>
 
   output {
     String something = read_string("my/path/to/something.txt")
-    File bashrc = "/root/.bashrc"
+    # The following may or may not work depending on what the execution engine
+    # supports.
+    #
+    # File bashrc = "/root/.bashrc"
   }
 
   requirements {
@@ -4864,14 +4860,6 @@ Example output:
 ```json
 {
   "relative_and_absolute.something": "something"
-}
-```
-
-Test config:
-
-```json
-{
-  "exclude_outputs": ["relative_and_absolute.bashrc"]
 }
 ```
 </p>
@@ -5358,6 +5346,7 @@ task one_mount_point {
 
   requirements {
     disks: "/mnt/outputs 10 GiB"
+    container: "ubuntu"
   }
 }
 ```
@@ -6542,10 +6531,10 @@ Example: multi_nested_inputs.wdl
 ```wdl
 version 1.2
 
-import "test_allow_nested_inputs.wdl"
+import "test_allow_nested_inputs.wdl" as nested
 
 workflow multi_nested_inputs { 
-  call test_allow_nested_inputs
+  call nested.test_allow_nested_inputs
 
   hints {
     allow_nested_inputs: false
@@ -6566,19 +6555,12 @@ Example input:
 }
 ```
 
-Example output:
-
-```json
-{
-  "multi_nested_inputs.nested_greeting": "Hello Joe"
-}
-```
-
 Test config:
 
 ```json
 {
-  "capabilities": ["allow_nested_inputs"]
+  "capabilities": ["allow_nested_inputs"],
+  "fail": true
 }
 ```
 </p>
@@ -8255,7 +8237,6 @@ task file_sizes {
     printf "this file is 22 bytes\n" > out.txt
   >>>
 
-  File created_file
   File? missing_file = None
 
   output {
@@ -8264,7 +8245,7 @@ task file_sizes {
     Float created_file_bytes = size(created_file, "B")
     Float multi_file_kb = size([created_file, missing_file], "K") # 0.022
 
-    Map[String, Pair[Int, File]] nested = {
+    Map[String, Pair[Int, File?]] nested = {
       "a": (10, created_file),
       "b": (50, missing_file)
     }
@@ -8288,9 +8269,14 @@ Example output:
 
 ```json
 {
+  "file_sizes.created_file": "out.txt",
   "file_sizes.missing_file_bytes": 0.0,
   "file_sizes.created_file_bytes": 22.0,
   "file_sizes.multi_file_kb": 0.022,
+  "file_size.nested": {
+    "a": (10, "out.txt"),
+    "b": (50, null)
+  }
   "file_sizes.nested_bytes": 22.0
 }
 ```
@@ -10488,7 +10474,7 @@ Example output:
   "chunk_array.o1": [["a", "b", "c"], ["d", "e", "f"]],
   "chunk_array.o2": [["a", "b", "c"], ["d", "e"]],
   "chunk_array.o3": [["a", "b"]],
-  "chunk_array.o4": [[]],
+  "chunk_array.o4": [],
   "chunk_array.concats": ["abc", "def"]
 }
 ``` 
@@ -10519,12 +10505,12 @@ version 1.2
 workflow test_flatten {
   input {
     Array[Array[Int]] ai2D = [[1, 2, 3], [1], [21, 22]]
-    Array[Array[File]] af2D = [["/tmp/X.txt"], ["/tmp/Y.txt", "/tmp/Z.txt"], []]
+    Array[Array[File]] af2D = [["data/cities.txt"], ["data/wizard.txt", "data/spell.txt"], []]
     Array[Array[Pair[Float, String]]] aap2D = [[(0.1, "mouse")], [(3, "cat"), (15, "dog")]]
     Map[Float, String] f2s = as_map(flatten(aap2D))
     Array[Array[Array[Int]]] ai3D = [[[1, 2], [3, 4]], [[5, 6], [7, 8]]]
     Array[Int] expected1D = [1, 2, 3, 1, 21, 22]
-    Array[File] expected2D = ["/tmp/X.txt", "/tmp/Y.txt", "/tmp/Z.txt"]
+    Array[File] expected2D = ["data/cities.txt", "data/wizard.txt", "data/spell.txt"]
     Array[Array[Int]] expected3D = [[1, 2], [3, 4], [5, 6], [7, 8]]
     Array[Pair[Float, String]] expectedArray = [(0.1, "mouse"), (3.0, "cat"), (15.0, "dog")]
     Map[Float, String] expectedMap = {0.1: "mouse", 3.0: "cat", 15.0: "dog"}
@@ -10995,7 +10981,7 @@ Example output:
 
 Given a key-value type collection (`Map`, `Struct`, or `Object`) and a key, tests whether the collection contains an entry with the given key.
 
-This function has thre variants:
+This function has three variants:
 
 1. `Boolean contains_key(Map[P, Y], P)`: Tests whether the `Map` has an entry with the given key. If `P` is an optional type (e.g., `String?`), then the second argument may be `None`.
 2. `Boolean contains_key(Object, String)`: Tests whether the `Object` has an entry with the given name.
@@ -11023,7 +11009,7 @@ For example, if the first argument is a `Map[String, Map[String, Int]]` and the 
 
   struct Person {
     String name
-    Map[String, String]? details
+    Map[String, String] details
   }
 
   workflow test_contains_key {
@@ -11061,7 +11047,9 @@ For example, if the first argument is a `Map[String, Map[String, Int]]` and the 
       }
     },
     "test_contains_key.p2": {
-      "name": "Agent X"
+      "name": "Agent X",
+      "details": {
+      }
     }
   }
   ```
